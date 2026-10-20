@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Video Player</title>
+    <!-- Tailwind CSS for clean layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+    <!-- Main Container -->
+    <main class="w-full max-w-4xl bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-700/50">
+        <!-- Video Player Wrapper -->
+        <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-inner">
+            <video 
+                controls 
+                preload="metadata"
+                poster="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80"
+                class="w-full h-full object-contain focus:outline-none"
+            >
+                <!-- Sample Video Source -->
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                
+                <!-- Fallback text for unsupported browsers -->
+                <p class="text-white text-center p-4">
+                    Your browser does not support HTML5 video.
+                </p>
+            </video>
+        </div>
+    </main>
+
+</body>
+</html>
