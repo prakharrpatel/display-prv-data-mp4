@@ -98,6 +98,7 @@
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
+      box-sizing: border-box;
     }
 
     .post-header {
@@ -125,19 +126,20 @@
       color: var(--greentext);
     }
 
-    /* --- MEDIA STYLING (Plain HTML) --- */
+    /* --- MEDIA STYLING (FIXED FOR MOBILE) --- */
     .media-container {
       margin-top: 10px;
     }
 
     .media-container img, 
     .media-container video {
+      width: 100%;
       max-width: 450px;
-      max-height: 250px;
+      height: auto;
       border: 1px solid #777;
-      
       display: block;
       background: #000;
+      box-sizing: border-box;
     }
 
     .fileinfo {
@@ -182,9 +184,8 @@
   <hr>
 
   <!-- ================= THREAD 1: IMAGE POST ================= -->
-
- <!-- 
   
+  <!-- 
   <div class="thread" id="thread-1">
     <div class="fileinfo">File: <a href="media/secret1.png" target="_blank">secret1.png</a> (1.2 MB, 1920x1080)</div>
     <div class="media-container">
@@ -218,7 +219,7 @@
       </div>
     </div>
   </div>
--->
+  -->
   
   <!-- ================= THREAD 2: VIDEO POST ================= -->
   <div class="thread" id="thread-2">
