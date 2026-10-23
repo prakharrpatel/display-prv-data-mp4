@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoardChan - Classic Image & Video Board</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Classic Imageboard Themes */
+        :root {
+            --bg-color: #ffeef2;
+            --main-bg: #ffffee;
+            --post-bg: #f0e0d6;
+            --post-border: #d9bfb7;
+            --text-color: #800000;
+            --body-text: #000000;
+            --link-color: #0000ee;
+            --link-hover: #dd0000;
+            --greentext: #789922;
+            --header-bg: #e04000;
+            --header-text: #ffffff;
+            --reply-header: #ea8;
+            --border-color: #b7c5d9;
+        }
+
+        /* Theme Variants */
+        body.theme-yotsuba {
+            --bg-color: #ffeef2;
+            --main-bg: #ffffee;
+            --post-bg: #f0e0d6;
+            --post-border: #d9bfb7;
+            --text-color: #800000;
+            --body-text: #000000;
+            --link-color: #34345c;
+            --link-hover: #dd0000;
+            --greentext: #789922;
+            --reply-header: #e04000;
+        }
+
+        body.theme-yotsuba-b {
+            --bg-color: #eef2ff;
+            --main-bg: #ffffff;
+            --post-bg: #d6daf0;
+            --post-border: #b7c5d9;
+            --text-color: #0f0c5d;
+            --body-text: #000000;
+            --link-color: #34345c;
+            --link-hover: #dd0000;
+            --greentext: #789922;
+            --reply-header: #34345c;
+        }
+
+        body.theme-tomorrow {
+            --bg-color: #1d1f21;
+            --main-bg: #282a2e;
+            --post-bg: #373b41;
+            --post-border: #4b4e54;
+            --text-color: #c5c8c6;
+            --body-text: #c5c8c6;
+            --link-color: #81a2be;
+            --link-hover: #b5bd68;
+            --greentext: #b5bd68;
+            --reply-header: #81a2be;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--body-text);
+            font-family: arial, helvetica, sans-serif;
+            font-size: 13px;
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--link-hover);
+            text-decoration: underline;
+        }
+
+        .board-header-title {
+            font-family: "Times New Roman", Times, serif;
+            color: var(--text-color);
+        }
+
+        .post-reply {
+            background-color: var(--post-bg);
+            border: 1px solid var(--post-border);
+            border-left: 0;
+            border-top: 0;
+        }
+
+        .post-op {
+            background-color: transparent;
+        }
+
+        .greentext {
+            color: var(--greentext);
+        }
+
+        .spoiler {
+            background-color: #000;
+            color: #000;
+            padding: 0 2px;
+            cursor: pointer;
+        }
+
+        .spoiler:hover, .spoiler.revealed {
+            color: #fff;
+        }
+
+        .post-subject {
+            color: #0f0c5d;
+            font-weight: bold;
+        }
+
+        .theme-tomorrow .post-subject {
+            color: #b294bb;
+        }
+
+        .post-name {
+            color: #117743;
+            font-weight: bold;
+        }
+
+        .post-number {
+            color: #000000;
+        }
+        .theme-tomorrow .post-number {
+            color: #c5c8c6;
+        }
+
+        .file-info {
+            font-size: 11px;
+            color: #707070;
+        }
+        .theme-tomorrow .file-info {
+            color: #969896;
+        }
+
+        /* Target Highlight */
+        .highlight {
+            background-color: #f0e0a8 !important;
+            border: 1px solid #d9bf77 !important;
+        }
+        .theme-tomorrow .highlight {
+            background-color: #4f4b38 !important;
+            border: 1px solid #948b52 !important;
+        }
+
+        /* Floating Quick Reply Modal */
+        #quick-reply {
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 50;
+        }
+
+        /* Compact Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--post-border);
+        }
+
+        /* Video / Media styling */
+        .media-preview {
+            max-width: 250px;
+            max-height: 250px;
+            object-fit: contain;
+            cursor: pointer;
+        }
+
+        .media-expanded {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        .catalog-card {
+            background-color: var(--post-bg);
+            border: 1px solid var(--post-border);
+        }
+    </style>
+</head>
+<body class="theme-yotsuba min-h-screen pb-12">
+
+    <!-- Top Navigation Bar -->
+    <div class="w-full border-b border-gray-400/40 text-xs px-2 py-1 flex flex-wrap justify-between items-center bg-black/5">
+        <div class="flex flex-wrap gap-1 items-center">
+            <span>[</span>
+            <a href="#" onclick="switchBoard('all'); return false;">all</a> /
+            <a href="#" onclick="switchBoard('b'); return false;">b</a> /
+            <a href="#" onclick="switchBoard('v'); return false;">v</a> /
+            <a href="#" onclick="switchBoard('media'); return false;">media</a> /
+            <a href="#" onclick="switchBoard('a'); return false;">a</a> /
+            <a href="#" onclick="switchBoard('g'); return false;">g</a>
+            <span>]</span>
+            <span class="mx-1">|</span>
+            <span>[</span>
+            <a href="#" onclick="showModal('rules'); return false;">rules</a> /
+            <a href="#" onclick="showModal('faq'); return false;">faq</a>
+            <span>]</span>
+        </div>
+        
+        <div class="flex items-center gap-3 mt-1 sm:mt-0">
+            <!-- Theme Switcher -->
+            <label class="text-xs">
+                Style: 
+                <select id="themeSelect" onchange="changeTheme(this.value)" class="text-xs bg-white text-black border border-gray-400 rounded px-1 py-0.5">
+                    <option value="theme-yotsuba">Yotsuba</option>
+                    <option value="theme-yotsuba-b">Yotsuba B</option>
+                    <option value="theme-tomorrow">Tomorrow (Dark)</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="text-center my-4 px-2">
+        <h1 id="boardTitle" class="board-header-title text-3xl sm:text-4xl font-bold tracking-tight">/b/ - Random</h1>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Welcome to BoardChan - Classic Image & Video Board</p>
+
+        <!-- Announcement Banner -->
+        <div class="max-w-xl mx-auto mt-3 p-2 text-xs border border-red-800/30 bg-red-50/50 rounded text-center">
+            <span class="font-bold text-red-800">Announcement:</span> WebM and HTML5 MP4 video uploads are now active! Remember to keep posts civil and follow the board rules.
+        </div>
+    </header>
+
+    <hr class="border-gray-400/40 my-3 max-w-5xl mx-auto">
+
+    <!-- Controls Bar & Posting Toggle -->
+    <main class="max-w-5xl mx-auto px-2 sm:px-4">
+
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4 bg-black/5 p-2 rounded text-xs">
+            <div class="flex items-center gap-2">
+                <button onclick="togglePostForm()" class="font-bold text-blue-700 dark:text-blue-400 hover:underline">
+                    [Start a New Thread]
+                </button>
+                <button onclick="toggleViewMode()" id="viewModeBtn" class="hover:underline font-semibold">
+                    [Catalog View]
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="text" id="searchInput" oninput="filterPosts()" placeholder="Search comments or files..." class="px-2 py-1 text-xs border border-gray-400 rounded bg-white dark:bg-gray-800 dark:text-white w-40 sm:w-56">
+                <select id="mediaFilter" onchange="filterPosts()" class="px-1 py-1 text-xs border border-gray-400 rounded bg-white dark:bg-gray-800 dark:text-white">
+                    <option value="all">All Media</option>
+                    <option value="image">Images Only</option>
+                    <option value="video">Videos Only</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- New Thread Post Form (Collapsible) -->
+        <div id="postFormContainer" class="hidden mb-6 max-w-lg mx-auto p-3 border border-gray-400 rounded bg-black/5">
+            <div class="text-center font-bold text-sm mb-2 border-b border-gray-300 pb-1" id="formHeaderTitle">New Thread</div>
+            <form id="newThreadForm" onsubmit="handlePostSubmit(event)" class="space-y-2 text-xs">
+                <div class="flex gap-2">
+                    <span class="w-16 font-bold text-right pt-1">Name:</span>
+                    <input type="text" id="postName" placeholder="Anonymous" class="flex-1 px-2 py-1 border border-gray-400 rounded dark:bg-gray-800 dark:text-white">
+                </div>
+                <div class="flex gap-2">
+                    <span class="w-16 font-bold text-right pt-1">Options:</span>
+                    <input type="text" id="postOptions" placeholder="e.g. sage" class="flex-1 px-2 py-1 border border-gray-400 rounded dark:bg-gray-800 dark:text-white">
+                </div>
+                <div class="flex gap-2">
+                    <span class="w-16 font-bold text-right pt-1">Subject:</span>
+                    <div class="flex flex-1 gap-1">
+                        <input type="text" id="postSubject" placeholder="Subject (optional)" class="flex-1 px-2 py-1 border border-gray-400 rounded dark:bg-gray-800 dark:text-white">
+                        <button type="submit" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-white font-bold border border-gray-400 rounded">Post</button>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <span class="w-16 font-bold text-right pt-1">Comment:</span>
+                    <textarea id="postComment" rows="4" required placeholder="Type your comment... Use '>' for green text, '[spoiler]text[/spoiler]' for spoilers" class="flex-1 px-2 py-1 border border-gray-400 rounded dark:bg-gray-800 dark:text-white"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <span class="w-16 font-bold text-right pt-1">File:</span>
+                    <div class="flex-1 space-y-1">
+                        <input type="file" id="postFile" accept="image/*,video/*" onchange="handleFileSelect(event)" class="text-xs">
+                        <div class="text-[10px] text-gray-500">Supported: JPG, PNG, GIF, MP4, WEBM (Max local preview)</div>
+                        <!-- File Preview -->
+                        <div id="filePreviewContainer" class="hidden mt-2 p-1 border border-dashed border-gray-400 inline-block">
+                            <div id="filePreview"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2 items-center pl-16">
+                    <label class="flex items-center gap-1 cursor-pointer">
+                        <input type="checkbox" id="postSpoiler">
+                        <span>Spoiler Image/Video</span>
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Thread List View -->
+        <div id="threadListView" class="space-y-6">
+            <!-- Threads injected dynamically -->
+        </div>
+
+        <!-- Catalog View (Grid Mode) -->
+        <div id="catalogView" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <!-- Catalog Cards injected dynamically -->
+        </div>
+
+    </main>
+
+    <!-- Floating Quick Reply Box -->
+    <div id="quick-reply" class="fixed top-12 right-4 w-80 bg-slate-100 dark:bg-slate-800 border-2 border-gray-500 rounded p-2 text-xs">
+        <div class="flex justify-between items-center bg-gray-300 dark:bg-gray-700 px-2 py-1 mb-2 font-bold cursor-move" id="qrHeader">
+            <span id="qrTitle">Quick Reply</span>
+            <button onclick="closeQuickReply()" class="text-red-600 font-bold hover:text-red-800">X</button>
+        </div>
+        <form onsubmit="handleQuickReplySubmit(event)" class="space-y-1.5">
+            <input type="hidden" id="qrThreadId">
+            <input type="text" id="qrName" placeholder="Anonymous" class="w-full px-1.5 py-1 border border-gray-400 rounded dark:bg-gray-900 dark:text-white">
+            <textarea id="qrComment" rows="4" required placeholder="Comment..." class="w-full px-1.5 py-1 border border-gray-400 rounded dark:bg-gray-900 dark:text-white"></textarea>
+            <div class="flex justify-between items-center">
+                <input type="file" id="qrFile" accept="image/*,video/*" class="w-40 text-[10px]">
+                <button type="submit" class="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 border border-gray-400 rounded font-bold hover:bg-gray-300">Reply</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Generic Modal (Rules / FAQ) -->
+    <div id="infoModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-gray-800 text-black dark:text-white max-w-md w-full p-4 rounded shadow-lg border border-gray-400 text-xs space-y-3">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h2 id="modalTitle" class="font-bold text-sm">Modal Title</h2>
+                <button onclick="closeModal()" class="font-bold text-red-600 text-base">&times;</button>
+            </div>
+            <div id="modalBody" class="space-y-2 max-h-80 overflow-y-auto">
+                <!-- Content injected dynamically -->
+            </div>
+            <div class="text-right pt-2 border-t">
+                <button onclick="closeModal()" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded border border-gray-400 font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Default Boards Data
+        const currentBoard = 'b';
+        let activeViewMode = 'threads'; // 'threads' or 'catalog'
+        let selectedFileBase64 = null;
+        let selectedFileType = null;
+        let selectedFileName = null;
+        let selectedFileSize = null;
+
+        // Pre-populated Sample Data
+        const initialThreads = [
+            {
+                id: 84930219,
+                board: 'b',
+                name: 'Anonymous',
+                subject: 'Nostalgic Web Design Thread',
+                timestamp: '10/23/26(Fri)11:42:10',
+                media: {
+                    type: 'image',
+                    url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80',
+                    name: 'retro_setup.jpg',
+                    size: '245 KB',
+                    dims: '800x600'
+                },
+                comment: 'Do you miss the old layout of the early 2000s web?\n>be me\n>browsing imageboards in 2008\n>simple light colors, fast load times, zero bloat\nAnyone else feeling nostalgic today? [spoiler] hidden tech secret [/spoiler]',
+                replies: [
+                    {
+                        id: 84930255,
+                        name: 'TechAnon',
+                        timestamp: '10/23/26(Fri)11:44:02',
+                        comment: '>>84930219\nAbsolutely. Modern web apps are way too bloated. Simple static HTML and light CSS was peak UX.'
+                    },
+                    {
+                        id: 84930290,
+                        name: 'Anonymous',
+                        timestamp: '10/23/26(Fri)11:46:18',
+                        comment: '>peak UX\n>tfw no heavy scripts\nIt just works. Great board setup OP!'
+                    }
+                ]
+            },
+            {
+                id: 90123847,
+                board: 'v',
+                name: 'GamerAnon',
+                subject: 'Classic Retro Gaming WebM / Video Thread',
+                timestamp: '10/23/26(Fri)11:30:15',
+                media: {
+                    type: 'video',
+                    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                    name: 'gameplay_clip.mp4',
+                    size: '2.1 MB',
+                    dims: '0:15'
+                },
+                comment: 'Post your favorite gameplay clips or short WebM loops!\n>tfw graphics used to be about art style rather than ray tracing\nWhat classic game are you replaying this weekend?',
+                replies: [
+                    {
+                        id: 90123900,
+                        name: 'RetroFan',
+                        timestamp: '10/23/26(Fri)11:35:50',
+                        comment: '>>90123847\nCurrently replaying Half-Life 2. Holds up incredibly well even today!'
+                    }
+                ]
+            },
+            {
+                id: 77210923,
+                board: 'g',
+                name: 'SysAdmin',
+                subject: 'Minimalist Linux & Tech Environments',
+                timestamp: '10/23/26(Fri)10:15:22',
+                media: {
+                    type: 'image',
+                    url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
+                    name: 'matrix_code.jpg',
+                    size: '180 KB',
+                    dims: '1024x768'
+                },
+                comment: 'Share your terminal setups and lightweight setups. What distro are you running on your main machine?',
+                replies: []
+            }
+        ];
+
+        // Local Storage Initialization
+        let threads = JSON.parse(localStorage.getItem('boardchan_threads')) || initialThreads;
+
+        function saveThreads() {
+            localStorage.setItem('boardchan_threads', JSON.stringify(threads));
+        }
+
+        // Active State
+        let activeBoard = 'all';
+
+        // Load Initial State
+        window.onload = function() {
+            renderThreads();
+            setupQuickReplyDraggable();
+        };
+
+        // Theme Switcher
+        function changeTheme(themeName) {
+            document.body.className = themeName + ' min-h-screen pb-12';
+            localStorage.setItem('boardchan_theme', themeName);
+        }
+
+        // Restore Saved Theme
+        const savedTheme = localStorage.getItem('boardchan_theme');
+        if (savedTheme) {
+            document.body.className = savedTheme + ' min-h-screen pb-12';
+            document.getElementById('themeSelect').value = savedTheme;
+        }
+
+        // Switch Board
+        function switchBoard(board) {
+            activeBoard = board;
+            const titles = {
+                'all': 'All Boards',
+                'b': '/b/ - Random',
+                'v': '/v/ - Video Games',
+                'media': '/media/ - Images & Videos',
+                'a': '/a/ - Anime',
+                'g': '/g/ - Technology'
+            };
+            document.getElementById('boardTitle').innerText = titles[board] || `/ ${board} /`;
+            renderThreads();
+        }
+
+        // Toggle Post Form
+        function togglePostForm() {
+            const form = document.getElementById('postFormContainer');
+            form.classList.toggle('hidden');
+        }
+
+        // Handle File Upload Preview
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            selectedFileName = file.name;
+            selectedFileSize = (file.size / 1024).toFixed(1) + ' KB';
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                selectedFileBase64 = evt.target.result;
+                const container = document.getElementById('filePreviewContainer');
+                const preview = document.getElementById('filePreview');
+                container.classList.remove('hidden');
+
+                if (file.type.startsWith('image/')) {
+                    selectedFileType = 'image';
+                    preview.innerHTML = `<img src="${selectedFileBase64}" class="max-h-24 max-w-xs object-contain">`;
+                } else if (file.type.startsWith('video/')) {
+                    selectedFileType = 'video';
+                    preview.innerHTML = `<video src="${selectedFileBase64}" controls class="max-h-24 max-w-xs"></video>`;
+                } else {
+                    preview.innerHTML = `<span class="text-xs">${file.name}</span>`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Handle Thread Submission
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('postName').value.trim() || 'Anonymous';
+            const subject = document.getElementById('postSubject').value.trim();
+            const comment = document.getElementById('postComment').value;
+            const isSpoiler = document.getElementById('postSpoiler').checked;
+
+            const now = new Date();
+            const timestamp = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear().toString().substr(-2)}(${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()]})${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+            const id = Math.floor(10000000 + Math.random() * 90000000);
+
+            let mediaObj = null;
+            if (selectedFileBase64) {
+                mediaObj = {
+                    type: selectedFileType,
+                    url: selectedFileBase64,
+                    name: selectedFileName,
+                    size: selectedFileSize,
+                    dims: selectedFileType === 'image' ? 'Expanded' : 'WebM/MP4',
+                    isSpoiler: isSpoiler
+                };
+            }
+
+            const newThread = {
+                id: id,
+                board: activeBoard === 'all' ? 'b' : activeBoard,
+                name: name,
+                subject: subject,
+                timestamp: timestamp,
+                media: mediaObj,
+                comment: comment,
+                replies: []
+            };
+
+            threads.unshift(newThread);
+            saveThreads();
+
+            // Reset form
+            document.getElementById('newThreadForm').reset();
+            document.getElementById('filePreviewContainer').classList.add('hidden');
+            selectedFileBase64 = null;
+            togglePostForm();
+
+            renderThreads();
+        }
+
+        // Format Comment Text (Green text, Quote links, Spoilers)
+        function formatComment(text) {
+            if (!text) return '';
+            
+            let lines = text.split('\n');
+            let formattedLines = lines.map(line => {
+                let escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                
+                // Green text
+                if (escaped.startsWith('&gt;') && !escaped.startsWith('&gt;&gt;')) {
+                    return `<span class="greentext">${escaped}</span>`;
+                }
+
+                // Quote Links >>12345678
+                escaped = escaped.replace(/&gt;&gt;(\d+)/g, '<a href="#p$1" onmouseover="highlightPost(\'$1\')" onmouseout="unhighlightPost(\'$1\')" class="text-blue-700 dark:text-blue-400 underline">&gt;&gt;$1</a>');
+
+                // Spoiler tags [spoiler]text[/spoiler]
+                escaped = escaped.replace(/\[spoiler\](.*?)\[\/spoiler\]/gi, '<span class="spoiler" onclick="this.classList.toggle(\'revealed\')">$1</span>');
+
+                return escaped;
+            });
+
+            return formattedLines.join('<br>');
+        }
+
+        // Toggle Inline Media Expansion
+        function toggleMediaExpand(imgElem, normalUrl, fullUrl) {
+            if (imgElem.classList.contains('media-expanded')) {
+                imgElem.classList.remove('media-expanded');
+                imgElem.classList.add('media-preview');
+            } else {
+                imgElem.classList.remove('media-preview');
+                imgElem.classList.add('media-expanded');
+            }
+        }
+
+        // Render Threads & Catalog
+        function renderThreads() {
+            const container = document.getElementById('threadListView');
+            const catalogContainer = document.getElementById('catalogView');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const mediaTypeVal = document.getElementById('mediaFilter').value;
+
+            container.innerHTML = '';
+            catalogContainer.innerHTML = '';
+
+            let filtered = threads.filter(t => {
+                if (activeBoard !== 'all' && t.board !== activeBoard) return false;
+                
+                // Search filter
+                if (searchVal) {
+                    const matchComment = t.comment.toLowerCase().includes(searchVal);
+                    const matchSubject = t.subject && t.subject.toLowerCase().includes(searchVal);
+                    const matchName = t.name.toLowerCase().includes(searchVal);
+                    if (!matchComment && !matchSubject && !matchName) return false;
+                }
+
+                // Media type filter
+                if (mediaTypeVal === 'image') {
+                    return t.media && t.media.type === 'image';
+                } else if (mediaTypeVal === 'video') {
+                    return t.media && t.media.type === 'video';
+                }
+
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No threads found in this board view.</div>';
+                return;
+            }
+
+            filtered.forEach(t => {
+                // Render Thread View
+                const threadElem = document.createElement('div');
+                threadElem.className = 'thread-container pb-4 border-b border-gray-400/30';
+                threadElem.id = `t${t.id}`;
+
+                let mediaHtml = '';
+                if (t.media) {
+                    if (t.media.type === 'image') {
+                        mediaHtml = `
+                            <div class="file-info mb-1">File: <a href="${t.media.url}" target="_blank" class="underline">${t.media.name}</a> (${t.media.size}, ${t.media.dims})</div>
+                            <img src="${t.media.url}" alt="File" class="media-preview float-left mr-3 mb-2 rounded border border-gray-300" onclick="toggleMediaExpand(this)">
+                        `;
+                    } else if (t.media.type === 'video') {
+                        mediaHtml = `
+                            <div class="file-info mb-1">File (Video): <a href="${t.media.url}" target="_blank" class="underline">${t.media.name}</a> (${t.media.size})</div>
+                            <video src="${t.media.url}" controls class="media-preview float-left mr-3 mb-2 rounded border border-gray-300"></video>
+                        `;
+                    }
+                }
+
+                let repliesHtml = t.replies.map(r => {
+                    let rMediaHtml = '';
+                    if (r.media) {
+                        if (r.media.type === 'image') {
+                            rMediaHtml = `<img src="${r.media.url}" class="media-preview float-left mr-2 mb-1" onclick="toggleMediaExpand(this)">`;
+                        } else if (r.media.type === 'video') {
+                            rMediaHtml = `<video src="${r.media.url}" controls class="media-preview float-left mr-2 mb-1"></video>`;
+                        }
+                    }
+
+                    return `
+                        <div class="post-reply p-2 my-1 max-w-3xl rounded-r" id="p${r.id}">
+                            <div class="flex flex-wrap items-center gap-1.5 text-xs mb-1">
+                                <input type="checkbox" class="mr-1">
+                                <span class="post-name">${r.name}</span>
+                                <span class="text-gray-500">${r.timestamp}</span>
+                                <a href="javascript:void(0)" onclick="openQuickReply('${t.id}', '${r.id}')" class="post-number hover:underline">No. ${r.id}</a>
+                            </div>
+                            <div class="clear-both">
+                                ${rMediaHtml}
+                                <div class="comment-body break-words">${formatComment(r.comment)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                threadElem.innerHTML = `
+                    <div class="post-op" id="p${t.id}">
+                        <div class="flex flex-wrap items-center gap-1.5 text-xs mb-1">
+                            <input type="checkbox" class="mr-1">
+                            ${t.subject ? `<span class="post-subject">${t.subject}</span>` : ''}
+                            <span class="post-name">${t.name}</span>
+                            <span class="text-gray-500">${t.timestamp}</span>
+                            <a href="javascript:void(0)" onclick="openQuickReply('${t.id}', '${t.id}')" class="post-number hover:underline">No. ${t.id}</a>
+                            <a href="javascript:void(0)" onclick="openQuickReply('${t.id}', '${t.id}')" class="text-blue-700 dark:text-blue-400 font-bold hover:underline">[Reply]</a>
+                        </div>
+                        <div class="overflow-hidden">
+                            ${mediaHtml}
+                            <div class="comment-body text-xs break-words leading-relaxed">${formatComment(t.comment)}</div>
+                        </div>
+                    </div>
+                    <div class="replies-container pl-4 sm:pl-8 mt-2 space-y-1">
+                        ${repliesHtml}
+                    </div>
+                `;
+
+                container.appendChild(threadElem);
+
+                // Render Catalog Card
+                const catalogCard = document.createElement('div');
+                catalogCard.className = 'catalog-card p-2 rounded flex flex-col items-center text-center text-xs overflow-hidden';
+                let thumbHtml = '<div class="w-24 h-24 bg-gray-300 flex items-center justify-center text-gray-600">No Media</div>';
+                if (t.media) {
+                    if (t.media.type === 'image') {
+                        thumbHtml = `<img src="${t.media.url}" class="w-28 h-28 object-cover rounded">`;
+                    } else if (t.media.type === 'video') {
+                        thumbHtml = `<video src="${t.media.url}" class="w-28 h-28 object-cover rounded"></video>`;
+                    }
+                }
+
+                catalogCard.innerHTML = `
+                    <a href="#t${t.id}" onclick="toggleViewMode('threads')" class="mb-1">${thumbHtml}</a>
+                    <div class="font-bold truncate w-full mt-1">${t.subject || 'No Subject'}</div>
+                    <div class="text-[10px] text-gray-500">R: ${t.replies.length}</div>
+                    <div class="text-[11px] mt-1 line-clamp-2 text-left w-full">${t.comment}</div>
+                `;
+                catalogContainer.appendChild(catalogCard);
+            });
+        }
+
+        // Toggle View Mode (Thread View vs Catalog View)
+        function toggleViewMode(forceMode = null) {
+            if (forceMode) {
+                activeViewMode = forceMode;
+            } else {
+                activeViewMode = activeViewMode === 'threads' ? 'catalog' : 'threads';
+            }
+
+            const threadView = document.getElementById('threadListView');
+            const catalogView = document.getElementById('catalogView');
+            const btn = document.getElementById('viewModeBtn');
+
+            if (activeViewMode === 'catalog') {
+                threadView.classList.add('hidden');
+                catalogView.classList.remove('hidden');
+                btn.innerText = '[Thread View]';
+            } else {
+                catalogView.classList.add('hidden');
+                threadView.classList.remove('hidden');
+                btn.innerText = '[Catalog View]';
+            }
+        }
+
+        // Filter Posts
+        function filterPosts() {
+            renderThreads();
+        }
+
+        // Highlight Post on hover quote
+        function highlightPost(id) {
+            const elem = document.getElementById(`p${id}`);
+            if (elem) elem.classList.add('highlight');
+        }
+
+        function unhighlightPost(id) {
+            const elem = document.getElementById(`p${id}`);
+            if (elem) elem.classList.remove('highlight');
+        }
+
+        // Floating Quick Reply Box System
+        function openQuickReply(threadId, quoteId) {
+            const qr = document.getElementById('quick-reply');
+            document.getElementById('qrThreadId').value = threadId;
+            const commentBox = document.getElementById('qrComment');
+            
+            if (quoteId) {
+                if (!commentBox.value.includes(`>>${quoteId}`)) {
+                    commentBox.value = `>>${quoteId}\n` + commentBox.value;
+                }
+            }
+            
+            qr.style.display = 'block';
+            commentBox.focus();
+        }
+
+        function closeQuickReply() {
+            document.getElementById('quick-reply').style.display = 'none';
+        }
+
+        function handleQuickReplySubmit(e) {
+            e.preventDefault();
+            const threadId = parseInt(document.getElementById('qrThreadId').value);
+            const name = document.getElementById('qrName').value.trim() || 'Anonymous';
+            const comment = document.getElementById('qrComment').value;
+            const fileInput = document.getElementById('qrFile');
+
+            const thread = threads.find(t => t.id === threadId);
+            if (!thread) return;
+
+            const now = new Date();
+            const timestamp = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear().toString().substr(-2)}(${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()]})${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+            const id = Math.floor(10000000 + Math.random() * 90000000);
+
+            const processReply = (mediaObj = null) => {
+                thread.replies.push({
+                    id: id,
+                    name: name,
+                    timestamp: timestamp,
+                    comment: comment,
+                    media: mediaObj
+                });
+                saveThreads();
+                renderThreads();
+                closeQuickReply();
+                document.getElementById('qrComment').value = '';
+                document.getElementById('qrFile').value = '';
+            };
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    processReply({
+                        type: file.type.startsWith('video/') ? 'video' : 'image',
+                        url: evt.target.result,
+                        name: file.name
+                    });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                processReply();
+            }
+        }
+
+        // Draggable Quick Reply Modal
+        function setupQuickReplyDraggable() {
+            const qr = document.getElementById('quick-reply');
+            const header = document.getElementById('qrHeader');
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            header.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - qr.offsetLeft;
+                offsetY = e.clientY - qr.offsetTop;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    qr.style.left = `${e.clientX - offsetX}px`;
+                    qr.style.top = `${e.clientY - offsetY}px`;
+                    qr.style.right = 'auto';
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        }
+
+        // Generic Modal Handler
+        function showModal(type) {
+            const modal = document.getElementById('infoModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            if (type === 'rules') {
+                title.innerText = 'Board Rules';
+                body.innerHTML = `
+                    <ol class="list-decimal pl-4 space-y-1">
+                        <li>Do not upload illegal or non-consensual content.</li>
+                        <li>Spamming, flooding, or automated bots are strictly prohibited.</li>
+                        <li>Respect board topics (e.g. video games on /v/, technology on /g/).</li>
+                        <li>Use spoiler tags [spoiler]text[/spoiler] when discussing major story points.</li>
+                    </ol>
+                `;
+            } else if (type === 'faq') {
+                title.innerText = 'Frequently Asked Questions';
+                body.innerHTML = `
+                    <div class="space-y-2">
+                        <p><strong>Q: How do I post green text?</strong><br>A: Start any line with a greater-than symbol (<code>&gt;</code>).</p>
+                        <p><strong>Q: How do I reply to a specific post?</strong><br>A: Click the post ID number or click <code>[Reply]</code> to automatically quote the post.</p>
+                        <p><strong>Q: Are video clips supported?</strong><br>A: Yes! You can upload standard HTML5 MP4 or WebM clips.</p>
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('infoModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
