@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDIA ARCHIVE</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        yotsuba: {
+                            bg: '#f0e0d6',
+                            card: '#ffffee',
+                            border: '#d9bfb0',
+                            borderHover: '#b88d75',
+                            maroon: '#800000',
+                            maroonHover: '#900000',
+                            text: '#000000',
+                            textMuted: '#444444',
+                            nav: '#ea8a78'
+                        }
+                    },
+                    borderRadius: {
+                        'DEFAULT': '3px',
+                        'sm': '3px',
+                        'md': '3px',
+                        'lg': '3px',
+                        'xl': '3px'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            border-radius: 3px !important;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #f0e0d6;
+            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .yotsuba-card {
+            background: #ffffee;
+            border: 1px solid #d9bfb0;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .yotsuba-card:hover {
+            border-color: #b88d75;
+        }
+
+        .yotsuba-input {
+            background: #ffffff;
+            border: 1px solid #d9bfb0;
+            color: #000000;
+            transition: border-color 0.15s ease;
+        }
+        .yotsuba-input:focus {
+            outline: none;
+            border-color: #800000;
+        }
+
+        .yotsuba-btn-maroon {
+            background: #800000;
+            color: #ffffff;
+            transition: background-color 0.15s ease;
+        }
+        .yotsuba-btn-maroon:hover {
+            background: #900000;
+        }
+
+        .yotsuba-btn-secondary {
+            background: #ffffff;
+            color: #800000;
+            border: 1px solid #d9bfb0;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .yotsuba-btn-secondary:hover {
+            background: #fbf7f4;
+            border-color: #800000;
+        }
+
+        /* Prevent image/video dragging & saving */
+        img, video {
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: auto;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0e0d6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d9bfb0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #800000;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="border-b border-[#d9bfb0] bg-[#ea8a78] text-white sticky top-0 z-40 px-3 sm:px-6 py-2.5 shadow-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-folder-closed text-xs sm:text-sm text-amber-100"></i>
+                <span class="font-mono text-xs sm:text-sm font-bold tracking-wide uppercase text-white">
+                    MEDIA ARCHIVE / <span id="currentRepoBadge">prv-data</span>
+                </span>
+            </div>
+
+            <!-- Path Breadcrumbs & Controls -->
+            <div class="flex items-center gap-2">
+                <div id="tokenIndicator" class="hidden sm:flex items-center gap-1.5 bg-red-950/20 border border-white/20 px-2 py-0.5 text-[10px] font-mono text-white">
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                    <span>PAT AUTHENTICATED</span>
+                </div>
+                <button id="toggleConfigBtn" class="bg-white/10 hover:bg-white/20 text-white text-xs px-2.5 py-1 font-mono flex items-center gap-1">
+                    <i class="fa-solid fa-key text-[10px]"></i>
+                    <span class="text-[11px]">Key</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
+
+        <!-- Token Entry Dropdown (Hidden by default once stored) -->
+        <div id="configPanel" class="yotsuba-card p-3 sm:p-4 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <label class="font-mono text-xs font-bold text-[#800000] flex items-center gap-1.5">
+                    <i class="fa-solid fa-lock text-[10px]"></i> PRIVATE REPOSITORY ACCESS TOKEN
+                </label>
+                <span class="text-[10px] font-mono text-[#444444]">GitHub PAT required to load private files</span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="password" id="repoToken" placeholder="Paste GitHub Personal Access Token (ghp_...)" class="yotsuba-input flex-1 px-3 py-1.5 font-mono text-xs">
+                <button id="saveTokenBtn" class="yotsuba-btn-maroon px-4 py-1.5 font-mono text-xs flex items-center justify-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-rotate text-[10px]"></i> Load Repository
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Bar & Directory Breadcrumbs -->
+        <div class="yotsuba-card p-2 sm:p-3 flex flex-wrap items-center justify-between gap-2">
+            <!-- Directory Navigation -->
+            <div class="flex items-center gap-1 overflow-x-auto text-xs font-mono py-0.5" id="breadcrumbNav">
+                <button onclick="navigateToPath('')" class="hover:underline font-bold text-[#800000] flex items-center gap-1">
+                    <i class="fa-solid fa-house text-[10px]"></i> root
+                </button>
+            </div>
+
+            <!-- Filters & Counter -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                <div class="flex items-center border border-[#d9bfb0] bg-white overflow-hidden text-[11px] font-mono">
+                    <button id="filterAllBtn" onclick="setMediaTypeFilter('all')" class="px-2.5 py-1 bg-[#800000] text-white">All</button>
+                    <button id="filterImgBtn" onclick="setMediaTypeFilter('image')" class="px-2.5 py-1 text-[#444444] hover:bg-stone-100">Images</button>
+                    <button id="filterVidBtn" onclick="setMediaTypeFilter('video')" class="px-2.5 py-1 text-[#444444] hover:bg-stone-100">Videos</button>
+                </div>
+                <span id="itemCounter" class="font-mono text-xs text-[#444444]">0 items</span>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative w-full">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#800000] text-xs">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="mediaSearch" placeholder="Search current directory..." class="yotsuba-input w-full pl-8 pr-3 py-2 font-mono text-xs">
+        </div>
+
+        <!-- Media Grid Display -->
+        <section class="min-h-[350px] relative">
+            <!-- Loading Skeleton -->
+            <div id="loadingSpinner" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+                <script>
+                    for(let i=0; i<10; i++) {
+                        document.write(`
+                            <div class="yotsuba-card h-36 sm:h-44 p-2 flex flex-col justify-between animate-pulse">
+                                <div class="bg-[#d9bfb0]/30 h-28 sm:h-36 w-full"></div>
+                                <div class="h-2 bg-[#d9bfb0]/40 w-3/4 mt-2"></div>
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="yotsuba-card p-8 sm:p-12 text-center max-w-md mx-auto my-8 flex flex-col items-center">
+                <div class="w-10 h-10 border border-[#d9bfb0] bg-white flex items-center justify-center mb-3 text-[#800000]">
+                    <i class="fa-solid fa-box-open text-base"></i>
+                </div>
+                <h3 class="font-mono text-xs font-bold text-[#800000]">No Media Found</h3>
+                <p class="text-xs text-[#444444] mt-1.5 leading-relaxed">
+                    Provide a valid Access Token above if this repository is private, or check subfolder contents.
+                </p>
+            </div>
+
+            <!-- Media Grid -->
+            <div id="mediaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3"></div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[#d9bfb0] bg-[#f0e0d6] py-3 text-center text-[11px] font-mono text-[#444444]">
+        <span>MEDIA ARCHIVE CONTAINER &bull; PRIVACY PROTECTED VIEW</span>
+    </footer>
+
+    <!-- Fullscreen Lightbox Modal -->
+    <div id="lightboxModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+        
+        <!-- Close Button -->
+        <button id="closeLightboxBtn" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 text-white hover:text-red-400 p-2 text-lg sm:text-xl font-mono">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <!-- Previous Button -->
+        <button id="prevBtn" class="absolute left-2 sm:left-4 z-50 text-white/70 hover:text-white p-3 text-xl sm:text-2xl font-mono bg-black/40 hover:bg-black/70">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- Next Button -->
+        <button id="nextBtn" class="absolute right-2 sm:right-4 z-50 text-white/70 hover:text-white p-3 text-xl sm:text-2xl font-mono bg-black/40 hover:bg-black/70">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <!-- Media Container -->
+        <div class="w-full h-full flex flex-col items-center justify-center p-2">
+            <div id="lightboxMediaHolder" class="relative max-w-full max-h-[85vh] flex items-center justify-center overflow-hidden">
+                <!-- Dynamically injected Image or Video -->
+            </div>
+            <div class="mt-2 text-center">
+                <span id="lightboxTitle" class="font-mono text-xs text-white/80 tracking-wide">--</span>
+                <div id="lightboxCounter" class="font-mono text-[10px] text-white/50 mt-0.5">0 / 0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Configuration Constants
+        const FIXED_OWNER = 'prakharrpatel';
+        const FIXED_REPO = 'prv-data';
+
+        // Supported Extensions
+        const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.avif', '.bmp'];
+        const VIDEO_EXTS = ['.mp4', '.webm', '.mov', '.m4v', '.ogg'];
+
+        // State
+        let currentPath = '';
+        let mediaItems = [];
+        let filteredItems = [];
+        let activeIndex = -1;
+        let activeFilter = 'all';
+        let activeBlobUrls = [];
+
+        // Touch Swipe State
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // DOM Elements
+        const repoToken = document.getElementById('repoToken');
+        const saveTokenBtn = document.getElementById('saveTokenBtn');
+        const configPanel = document.getElementById('configPanel');
+        const toggleConfigBtn = document.getElementById('toggleConfigBtn');
+        const tokenIndicator = document.getElementById('tokenIndicator');
+        const breadcrumbNav = document.getElementById('breadcrumbNav');
+        const mediaSearch = document.getElementById('mediaSearch');
+        const mediaGrid = document.getElementById('mediaGrid');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const emptyState = document.getElementById('emptyState');
+        const itemCounter = document.getElementById('itemCounter');
+
+        // Lightbox Elements
+        const lightboxModal = document.getElementById('lightboxModal');
+        const lightboxMediaHolder = document.getElementById('lightboxMediaHolder');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxCounter = document.getElementById('lightboxCounter');
+        const closeLightboxBtn = document.getElementById('closeLightboxBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('prv_data_token');
+            if (savedToken) {
+                repoToken.value = savedToken;
+                tokenIndicator.classList.remove('hidden');
+                configPanel.classList.add('hidden');
+            }
+
+            setupEvents();
+            fetchDirectoryContents(currentPath);
+        });
+
+        function setupEvents() {
+            saveTokenBtn.addEventListener('click', () => {
+                const token = repoToken.value.trim();
+                if (token) {
+                    localStorage.setItem('prv_data_token', token);
+                    tokenIndicator.classList.remove('hidden');
+                    showToast('Token saved', 'success');
+                } else {
+                    localStorage.removeItem('prv_data_token');
+                    tokenIndicator.classList.add('hidden');
+                }
+                configPanel.classList.add('hidden');
+                fetchDirectoryContents(currentPath);
+            });
+
+            toggleConfigBtn.addEventListener('click', () => {
+                configPanel.classList.toggle('hidden');
+            });
+
+            mediaSearch.addEventListener('input', applyFilters);
+
+            closeLightboxBtn.addEventListener('click', closeLightbox);
+            prevBtn.addEventListener('click', showPrevMedia);
+            nextBtn.addEventListener('click', showNextMedia);
+
+            lightboxModal.addEventListener('click', (e) => {
+                if (e.target === lightboxModal || e.target.id === 'lightboxMediaHolder') {
+                    closeLightbox();
+                }
+            });
+
+            // Keyboard Navigation
+            window.addEventListener('keydown', (e) => {
+                if (lightboxModal.classList.contains('opacity-0')) return;
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') showPrevMedia();
+                if (e.key === 'ArrowRight') showNextMedia();
+            });
+
+            // Touch Gestures for Mobile Lightbox
+            lightboxModal.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            lightboxModal.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+        }
+
+        function handleSwipe() {
+            const diff = touchEndX - touchStartX;
+            if (Math.abs(diff) > 40) {
+                if (diff < 0) showNextMedia(); // Swipe Left -> Next
+                else showPrevMedia(); // Swipe Right -> Prev
+            }
+        }
+
+        function clearBlobUrls() {
+            activeBlobUrls.forEach(url => URL.revokeObjectURL(url));
+            activeBlobUrls = [];
+        }
+
+        async function fetchDirectoryContents(path) {
+            currentPath = path;
+            clearBlobUrls();
+            updateBreadcrumbs();
+
+            loadingSpinner.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            mediaGrid.innerHTML = '';
+
+            const token = repoToken.value.trim() || localStorage.getItem('prv_data_token');
+            let url = `https://api.github.com/repos/${FIXED_OWNER}/${FIXED_REPO}/contents`;
+            if (path) url += `/${path}`;
+
+            const headers = {};
+            if (token) headers['Authorization'] = `token ${token}`;
+
+            try {
+                const response = await fetch(url, { headers });
+                if (!response.ok) {
+                    if (response.status === 404) throw new Error('Path or repository not found.');
+                    if (response.status === 401) throw new Error('Unauthorized. Check Access Token.');
+                    throw new Error(`API Error (${response.status})`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('Expected directory array.');
+
+                mediaItems = data.map(item => {
+                    const ext = '.' + item.name.split('.').pop().toLowerCase();
+                    const isImg = IMAGE_EXTS.includes(ext);
+                    const isVid = VIDEO_EXTS.includes(ext);
+                    const isDir = item.type === 'dir';
+
+                    return {
+                        name: item.name,
+                        path: item.path,
+                        type: isDir ? 'dir' : (isImg ? 'image' : (isVid ? 'video' : 'other')),
+                        download_url: item.download_url,
+                        size: item.size
+                    };
+                }).filter(i => i.type !== 'other');
+
+                applyFilters();
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+                emptyState.classList.remove('hidden');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function setMediaTypeFilter(filter) {
+            activeFilter = filter;
+            document.getElementById('filterAllBtn').className = filter === 'all' ? 'px-2.5 py-1 bg-[#800000] text-white' : 'px-2.5 py-1 text-[#444444] hover:bg-stone-100';
+            document.getElementById('filterImgBtn').className = filter === 'image' ? 'px-2.5 py-1 bg-[#800000] text-white' : 'px-2.5 py-1 text-[#444444] hover:bg-stone-100';
+            document.getElementById('filterVidBtn').className = filter === 'video' ? 'px-2.5 py-1 bg-[#800000] text-white' : 'px-2.5 py-1 text-[#444444] hover:bg-stone-100';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = mediaSearch.value.toLowerCase().trim();
+
+            filteredItems = mediaItems.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(query);
+                if (item.type === 'dir') return matchesSearch;
+
+                const matchesType = activeFilter === 'all' || item.type === activeFilter;
+                return matchesSearch && matchesType;
+            });
+
+            itemCounter.textContent = `${filteredItems.length} items`;
+            renderGrid();
+        }
+
+        function renderGrid() {
+            mediaGrid.innerHTML = '';
+
+            if (filteredItems.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            filteredItems.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "yotsuba-card p-2 flex flex-col justify-between cursor-pointer group";
+
+                if (item.type === 'dir') {
+                    card.innerHTML = `
+                        <div class="h-28 sm:h-36 bg-[#fbf7f4] border border-[#d9bfb0] flex flex-col items-center justify-center gap-1 group-hover:border-[#800000] transition">
+                            <i class="fa-solid fa-folder text-3xl sm:text-4xl text-[#800000]"></i>
+                        </div>
+                        <div class="mt-1.5 flex items-center justify-between text-xs font-mono">
+                            <span class="font-bold text-[#800000] truncate">${item.name}</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-[#444444]"></i>
+                        </div>
+                    `;
+                    card.onclick = () => navigateToPath(item.path);
+                } else {
+                    // Image or Video card
+                    const icon = item.type === 'video' ? 'fa-video' : 'fa-image';
+                    card.innerHTML = `
+                        <div class="relative h-28 sm:h-36 bg-stone-900 border border-[#d9bfb0] overflow-hidden flex items-center justify-center">
+                            <div id="thumb-${index}" class="w-full h-full flex items-center justify-center text-stone-500">
+                                <i class="fa-solid ${icon} text-lg animate-pulse"></i>
+                            </div>
+                        </div>
+                        <div class="mt-1.5 flex items-center justify-between text-[11px] font-mono text-[#444444]">
+                            <span class="truncate pr-1">${item.name}</span>
+                            <i class="fa-solid fa-expand text-[10px] text-[#800000]"></i>
+                        </div>
+                    `;
+                    card.onclick = () => openLightbox(index);
+
+                    // Fetch blob for thumb preview asynchronously
+                    loadCardThumbnail(item, index);
+                }
+
+                mediaGrid.appendChild(card);
+            });
+        }
+
+        async function loadCardThumbnail(item, index) {
+            const token = repoToken.value.trim() || localStorage.getItem('prv_data_token');
+            const headers = {};
+            if (token) headers['Authorization'] = `token ${token}`;
+
+            try {
+                const res = await fetch(item.download_url, { headers });
+                if (!res.ok) throw new Error();
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                activeBlobUrls.push(blobUrl);
+
+                const container = document.getElementById(`thumb-${index}`);
+                if (!container) return;
+
+                if (item.type === 'image') {
+                    container.innerHTML = `<img src="${blobUrl}" draggable="false" class="w-full h-full object-cover">`;
+                } else if (item.type === 'video') {
+                    container.innerHTML = `
+                        <video src="${blobUrl}#t=0.5" preload="metadata" draggable="false" class="w-full h-full object-cover"></video>
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <i class="fa-solid fa-play text-white text-xs drop-shadow"></i>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                const container = document.getElementById(`thumb-${index}`);
+                if (container) {
+                    container.innerHTML = `<i class="fa-solid fa-file text-xs text-stone-400"></i>`;
+                }
+            }
+        }
+
+        async function openLightbox(index) {
+            const item = filteredItems[index];
+            if (!item || item.type === 'dir') return;
+
+            activeIndex = index;
+            lightboxTitle.textContent = item.name;
+            lightboxCounter.textContent = `${index + 1} / ${filteredItems.length}`;
+            lightboxMediaHolder.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-2xl text-white"></i>`;
+
+            lightboxModal.classList.remove('opacity-0', 'pointer-events-none');
+
+            const token = repoToken.value.trim() || localStorage.getItem('prv_data_token');
+            const headers = {};
+            if (token) headers['Authorization'] = `token ${token}`;
+
+            try {
+                const res = await fetch(item.download_url, { headers });
+                if (!res.ok) throw new Error();
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                activeBlobUrls.push(blobUrl);
+
+                if (item.type === 'image') {
+                    lightboxMediaHolder.innerHTML = `<img src="${blobUrl}" draggable="false" class="max-w-full max-h-[80vh] object-contain shadow-2xl">`;
+                } else if (item.type === 'video') {
+                    lightboxMediaHolder.innerHTML = `<video src="${blobUrl}" controls autoplay draggable="false" class="max-w-full max-h-[80vh] shadow-2xl"></video>`;
+                }
+            } catch (err) {
+                lightboxMediaHolder.innerHTML = `<span class="text-xs font-mono text-rose-400">Failed to load stream blob</span>`;
+            }
+        }
+
+        function closeLightbox() {
+            lightboxMediaHolder.innerHTML = '';
+            lightboxModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function showPrevMedia() {
+            if (activeIndex <= 0) return;
+            let prev = activeIndex - 1;
+            while (prev >= 0 && filteredItems[prev].type === 'dir') prev--;
+            if (prev >= 0) openLightbox(prev);
+        }
+
+        function showNextMedia() {
+            if (activeIndex >= filteredItems.length - 1) return;
+            let next = activeIndex + 1;
+            while (next < filteredItems.length && filteredItems[next].type === 'dir') next++;
+            if (next < filteredItems.length) openLightbox(next);
+        }
+
+        function navigateToPath(path) {
+            fetchDirectoryContents(path);
+        }
+
+        function updateBreadcrumbs() {
+            breadcrumbNav.innerHTML = `
+                <button onclick="navigateToPath('')" class="hover:underline font-bold text-[#800000] flex items-center gap-1">
+                    <i class="fa-solid fa-house text-[10px]"></i> root
+                </button>
+            `;
+
+            if (!currentPath) return;
+
+            const parts = currentPath.split('/');
+            let accumulated = '';
+
+            parts.forEach((part) => {
+                accumulated += (accumulated ? '/' : '') + part;
+                const pathTarget = accumulated;
+                breadcrumbNav.innerHTML += `
+                    <span class="text-[#d9bfb0]">/</span>
+                    <button onclick="navigateToPath('${pathTarget}')" class="hover:underline font-bold text-[#800000]">
+                        ${part}
+                    </button>
+                `;
+            });
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-3 py-1.5 bg-[#800000] text-white text-xs font-mono shadow-md flex items-center gap-2`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check'}"></i><span>${msg}</span>`;
+            
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+    </script>
+</body>
+</html>
