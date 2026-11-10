@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>prakharrpatel | display-prv-data-mp4</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        chan: {
+                            bg: '#ffeef0',         // Yotsuba B warm background
+                            post: '#f0e0d6',       // Post box warm beige
+                            postHover: '#ea3e1',
+                            header: '#800000',     // Classic maroon / dark red
+                            headerText: '#ffffee',
+                            text: '#000000',
+                            muted: '#444444',
+                            border: '#d9bfb7',     // Soft vintage border
+                            borderDark: '#b7c5d9',
+                            link: '#34345c',
+                            linkHover: '#dd0000'
+                        }
+                    },
+                    borderRadius: {
+                        DEFAULT: '3px',
+                        'sm': '3px',
+                        'md': '3px',
+                        'lg': '3px',
+                        'xl': '3px',
+                        '2xl': '3px',
+                        'full': '3px'
+                    },
+                    fontFamily: {
+                        mono: ['Consolas', 'Monaco', 'Courier New', 'monospace'],
+                        sans: ['Tahoma', 'Verdana', 'Arial', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #ffeef0;
+            color: #800000;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* 4chan Board Aesthetics with Sharp 3px Borders */
+        .chan-card {
+            background-color: #f0e0d6;
+            border: 1px solid #d9bfb7;
+            border-radius: 3px !important;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .chan-card:hover {
+            border-color: #800000;
+        }
+
+        .chan-input {
+            background-color: #ffffff;
+            border: 1px solid #a9a9a9;
+            border-radius: 3px !important;
+            color: #000000;
+            outline: none;
+        }
+        .chan-input:focus {
+            border-color: #800000;
+        }
+
+        .chan-btn {
+            background-color: #f0e0d6;
+            color: #800000;
+            border: 1px solid #d9bfb7;
+            border-radius: 3px !important;
+            font-weight: bold;
+            transition: all 0.15s ease;
+        }
+        .chan-btn:hover {
+            background-color: #800000;
+            color: #ffffff;
+            border-color: #800000;
+        }
+
+        .chan-pill {
+            border-radius: 3px !important;
+            border: 1px solid #d9bfb7;
+            background: #f0e0d6;
+            color: #800000;
+            transition: all 0.15s ease;
+        }
+        .chan-pill.active {
+            background: #800000;
+            color: #ffffff;
+            border-color: #800000;
+            font-weight: bold;
+        }
+
+        /* Disable image drag and saving visuals */
+        img, video {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            pointer-events: auto;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffeef0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d9bfb7;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #800000;
+        }
+
+        /* Responsive Fluid Grid Layout */
+        .responsive-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+        @media (min-width: 640px) {
+            .responsive-media-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 12px;
+            }
+        }
+
+        /* Swipe Slide Animations */
+        .slide-next-enter {
+            animation: slideNextEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .slide-prev-enter {
+            animation: slidePrevEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideNextEnter {
+            from { transform: translateX(40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slidePrevEnter {
+            from { transform: translateX(-40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#ffeef0] text-[#800000]" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
+
+    <!-- Notification Toast -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Board Header -->
+    <header class="border-b border-[#d9bfb7] bg-[#f0e0d6] px-4 py-2.5 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="font-mono text-sm font-bold text-[#800000]">/media/</span>
+                <span class="text-xs font-mono text-[#444444] hidden sm:inline">- prakharrpatel / display-prv-data-mp4</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="toggleSettingsBtn" class="chan-btn px-2.5 py-1 text-xs font-mono flex items-center gap-1.5">
+                    <i class="fa-solid fa-key text-[10px]"></i>
+                    <span>Access Token</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
+
+        <!-- Access Token Config Box (Collapsible) -->
+        <section id="tokenSection" class="hidden chan-card p-3 border-[#d9bfb7]">
+            <div class="flex flex-col gap-2">
+                <label class="font-mono text-xs text-[#800000] font-bold">
+                    PERSONAL ACCESS TOKEN (FOR PRIVATE REPOS)
+                </label>
+                <div class="flex gap-2">
+                    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="chan-input w-full px-3 py-1 font-mono text-xs">
+                    <button id="saveTokenBtn" class="chan-btn px-4 py-1 text-xs font-mono shrink-0">Save</button>
+                    <button id="clearTokenBtn" class="chan-btn px-3 py-1 text-xs font-mono shrink-0 text-red-700">Clear</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Board Toolbar -->
+        <section class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[#d9bfb7] pb-3">
+            
+            <!-- Category Filter Tabs -->
+            <div class="flex items-center gap-1">
+                <button class="chan-pill active px-3 py-1 text-xs font-mono" data-filter="all">
+                    ALL <span id="countAll" class="opacity-70">(0)</span>
+                </button>
+                <button class="chan-pill px-3 py-1 text-xs font-mono" data-filter="image">
+                    IMAGES <span id="countImages" class="opacity-70">(0)</span>
+                </button>
+                <button class="chan-pill px-3 py-1 text-xs font-mono" data-filter="video">
+                    VIDEOS <span id="countVideos" class="opacity-70">(0)</span>
+                </button>
+            </div>
+
+            <!-- Search & Fetch -->
+            <div class="flex items-center gap-2">
+                <input type="text" id="searchInput" placeholder="Search file names..." class="chan-input px-3 py-1 text-xs font-mono w-full sm:w-48">
+                <button id="syncBtn" class="chan-btn px-3 py-1 text-xs font-mono flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-rotate-right text-[10px]" id="syncIcon"></i>
+                    <span>Reload</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Media Grid Area -->
+        <section class="min-h-[400px]">
+            <!-- Skeleton Loading -->
+            <div id="skeletonLoader" class="hidden responsive-media-grid">
+                <script>
+                    for(let i=0; i<12; i++) {
+                        document.write(`
+                            <div class="chan-card p-2 flex flex-col justify-between animate-pulse">
+                                <div class="bg-[#d9bfb7] aspect-square rounded-[3px] w-full"></div>
+                                <div class="h-2 bg-[#d9bfb7] rounded-[3px] w-2/3 mt-2"></div>
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="chan-card p-8 text-center max-w-sm mx-auto my-12 flex flex-col items-center">
+                <i class="fa-regular fa-folder-open text-2xl text-[#800000] mb-2"></i>
+                <h3 class="font-mono text-xs font-bold text-[#800000]">No Assets Loaded</h3>
+                <p class="text-xs text-[#444444] mt-1 font-sans">
+                    Click 'Reload' or verify access token if repo is private.
+                </p>
+            </div>
+
+            <!-- Asset Grid -->
+            <div id="mediaGrid" class="responsive-media-grid"></div>
+        </section>
+
+    </main>
+
+    <!-- Fullscreen Swipe Lightbox Modal -->
+    <div id="mediaModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+        
+        <!-- Touch / Click Nav Controls Overlay -->
+        <button id="prevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-[3px] bg-[#f0e0d6] text-[#800000] border border-[#d9bfb7] hover:bg-[#800000] hover:text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+
+        <button id="nextBtn" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-[3px] bg-[#f0e0d6] text-[#800000] border border-[#d9bfb7] hover:bg-[#800000] hover:text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+
+        <!-- Main Lightbox Dialog -->
+        <div class="chan-card w-full max-w-4xl overflow-hidden flex flex-col max-h-[95vh] bg-[#f0e0d6] relative z-20">
+            <!-- Modal Header -->
+            <div class="p-2 sm:p-3 border-b border-[#d9bfb7] flex items-center justify-between bg-[#f0e0d6]">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <span id="modalCounter" class="font-mono text-xs font-bold text-[#800000] bg-[#ffeef0] px-2 py-0.5 border border-[#d9bfb7] rounded-[3px]">1 / 1</span>
+                    <span id="modalFileName" class="font-mono text-xs text-[#000000] truncate max-w-xs sm:max-w-md">file_name</span>
+                </div>
+                <button id="closeModalBtn" class="chan-btn px-2 py-0.5 text-xs font-mono">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body (Swipe Container) -->
+            <div id="swipeContainer" class="p-2 sm:p-4 flex-1 overflow-hidden flex items-center justify-center bg-[#ffeef0] relative min-h-[300px] max-h-[80vh]">
+                <div id="modalViewer" class="w-full h-full flex items-center justify-center">
+                    <!-- Dynamic Media Content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const CONFIG = {
+            owner: 'prakharrpatel',
+            repo: 'display-prv-data-mp4',
+            path: ''
+        };
+
+        const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'avif', 'bmp'];
+        const VIDEO_EXTS = ['mp4', 'webm', 'mov', 'm4v', 'ogg'];
+
+        let allAssets = [];
+        let filteredAssets = [];
+        let currentFilter = 'all';
+        let currentIndex = -1;
+
+        // In-memory cache for Object URLs (Security measure: blob URLs hide original GitHub endpoints)
+        const objectUrlCache = new Map();
+
+        // Touch Swipe State
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // DOM References
+        const syncBtn = document.getElementById('syncBtn');
+        const syncIcon = document.getElementById('syncIcon');
+        const searchInput = document.getElementById('searchInput');
+        const mediaGrid = document.getElementById('mediaGrid');
+        const skeletonLoader = document.getElementById('skeletonLoader');
+        const emptyState = document.getElementById('emptyState');
+        const toastContainer = document.getElementById('toastContainer');
+
+        const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+        const tokenSection = document.getElementById('tokenSection');
+        const tokenInput = document.getElementById('tokenInput');
+        const saveTokenBtn = document.getElementById('saveTokenBtn');
+        const clearTokenBtn = document.getElementById('clearTokenBtn');
+
+        const countAll = document.getElementById('countAll');
+        const countImages = document.getElementById('countImages');
+        const countVideos = document.getElementById('countVideos');
+        const pillTabs = document.querySelectorAll('.chan-pill');
+
+        // Modal
+        const mediaModal = document.getElementById('mediaModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const modalFileName = document.getElementById('modalFileName');
+        const modalCounter = document.getElementById('modalCounter');
+        const modalViewer = document.getElementById('modalViewer');
+        const swipeContainer = document.getElementById('swipeContainer');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('gh_pat_token') || '';
+            if (savedToken) tokenInput.value = savedToken;
+
+            setupEventListeners();
+            fetchRepoContents();
+        });
+
+        function setupEventListeners() {
+            syncBtn.addEventListener('click', fetchRepoContents);
+            searchInput.addEventListener('input', applyFilters);
+
+            pillTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    pillTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentFilter = tab.getAttribute('data-filter');
+                    applyFilters();
+                });
+            });
+
+            toggleSettingsBtn.addEventListener('click', () => tokenSection.classList.toggle('hidden'));
+
+            saveTokenBtn.addEventListener('click', () => {
+                const token = tokenInput.value.trim();
+                if (token) {
+                    localStorage.setItem('gh_pat_token', token);
+                    showToast('Access Token saved', 'success');
+                } else {
+                    localStorage.removeItem('gh_pat_token');
+                }
+                fetchRepoContents();
+            });
+
+            clearTokenBtn.addEventListener('click', () => {
+                tokenInput.value = '';
+                localStorage.removeItem('gh_pat_token');
+                showToast('Token removed', 'info');
+                fetchRepoContents();
+            });
+
+            // Lightbox Nav
+            closeModalBtn.addEventListener('click', closeLightbox);
+            prevBtn.addEventListener('click', () => navigateModal(-1, 'prev'));
+            nextBtn.addEventListener('click', () => navigateModal(1, 'next'));
+
+            mediaModal.addEventListener('click', (e) => {
+                if (e.target === mediaModal) closeLightbox();
+            });
+
+            // Keyboard Navigation
+            document.addEventListener('keydown', (e) => {
+                if (mediaModal.classList.contains('opacity-0')) return;
+                if (e.key === 'ArrowLeft') navigateModal(-1, 'prev');
+                if (e.key === 'ArrowRight') navigateModal(1, 'next');
+                if (e.key === 'Escape') closeLightbox();
+            });
+
+            // Swipe Gestures for Mobile
+            swipeContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            swipeContainer.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipeGesture();
+            }, { passive: true });
+        }
+
+        function handleSwipeGesture() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                navigateModal(1, 'next'); // Swipe Left -> Next
+            } else if (touchEndX > touchStartX + swipeThreshold) {
+                navigateModal(-1, 'prev'); // Swipe Right -> Prev
+            }
+        }
+
+        async function fetchRepoContents() {
+            skeletonLoader.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            mediaGrid.innerHTML = '';
+            syncBtn.disabled = true;
+            syncIcon.classList.add('fa-spin');
+
+            // Clear previous Blob URLs
+            objectUrlCache.forEach(url => URL.revokeObjectURL(url));
+            objectUrlCache.clear();
+
+            const token = localStorage.getItem('gh_pat_token') || tokenInput.value.trim();
+            const headers = {};
+            if (token) headers['Authorization'] = `token ${token}`;
+
+            const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
+
+            try {
+                const response = await fetch(apiUrl, { headers });
+
+                if (!response.ok) {
+                    if (response.status === 404) throw new Error('Repository not found or private.');
+                    if (response.status === 401) throw new Error('Invalid Access Token.');
+                    throw new Error(`GitHub API Error (${response.status})`);
+                }
+
+                const data = await response.json();
+
+                if (!Array.isArray(data)) throw new Error('Path is not a valid folder.');
+
+                allAssets = data.filter(item => item.type === 'file').map(file => {
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    let mediaType = 'other';
+                    if (IMAGE_EXTS.includes(ext)) mediaType = 'image';
+                    else if (VIDEO_EXTS.includes(ext)) mediaType = 'video';
+
+                    return { ...file, ext, mediaType };
+                }).filter(file => file.mediaType === 'image' || file.mediaType === 'video');
+
+                showToast(`Loaded ${allAssets.length} assets`, 'success');
+                updateCounts();
+                applyFilters();
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'Failed to load media.', 'error');
+                emptyState.classList.remove('hidden');
+            } finally {
+                skeletonLoader.classList.add('hidden');
+                syncBtn.disabled = false;
+                syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function updateCounts() {
+            const imgCount = allAssets.filter(a => a.mediaType === 'image').length;
+            const vidCount = allAssets.filter(a => a.mediaType === 'video').length;
+
+            countAll.textContent = `(${allAssets.length})`;
+            countImages.textContent = `(${imgCount})`;
+            countVideos.textContent = `(${vidCount})`;
+        }
+
+        function applyFilters() {
+            const query = searchInput.value.toLowerCase().trim();
+
+            filteredAssets = allAssets.filter(asset => {
+                const matchesSearch = asset.name.toLowerCase().includes(query);
+                const matchesType = (currentFilter === 'all') || (asset.mediaType === currentFilter);
+                return matchesSearch && matchesType;
+            });
+
+            renderGrid();
+        }
+
+        function renderGrid() {
+            mediaGrid.innerHTML = '';
+
+            if (filteredAssets.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            filteredAssets.forEach((asset, index) => {
+                const card = document.createElement('div');
+                card.className = "chan-card p-1.5 sm:p-2 flex flex-col justify-between group cursor-pointer hover:shadow-sm";
+                card.onclick = () => openLightbox(index);
+
+                card.innerHTML = `
+                    <div class="relative w-full aspect-square bg-[#ffeef0] border border-[#d9bfb7] rounded-[3px] overflow-hidden flex items-center justify-center">
+                        <div id="thumb-${index}" class="w-full h-full flex items-center justify-center p-0.5">
+                            <i class="fa-solid fa-spinner fa-spin text-xs text-[#800000]"></i>
+                        </div>
+                        <span class="absolute top-1 right-1 bg-[#800000]/90 text-white text-[9px] font-mono px-1 rounded-[3px] uppercase z-10">
+                            ${asset.ext}
+                        </span>
+                    </div>
+                    <div class="mt-1.5 px-0.5 truncate">
+                        <span class="font-mono text-[11px] font-bold text-[#800000] truncate block">${asset.name}</span>
+                    </div>
+                `;
+
+                mediaGrid.appendChild(card);
+                loadThumbnailBlob(asset, index);
+            });
+        }
+
+        // Fetch asset as Secure Blob URL to prevent exposing GitHub raw links
+        async function getAssetBlobUrl(asset) {
+            if (objectUrlCache.has(asset.sha)) {
+                return objectUrlCache.get(asset.sha);
+            }
+
+            const token = localStorage.getItem('gh_pat_token') || tokenInput.value.trim();
+            const headers = {};
+            if (token) headers['Authorization'] = `token ${token}`;
+
+            const response = await fetch(asset.download_url, { headers });
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            objectUrlCache.set(asset.sha, objectUrl);
+            return objectUrl;
+        }
+
+        async function loadThumbnailBlob(asset, index) {
+            const container = document.getElementById(`thumb-${index}`);
+            if (!container) return;
+
+            try {
+                const blobUrl = await getAssetBlobUrl(asset);
+                if (asset.mediaType === 'image') {
+                    container.innerHTML = `<img src="${blobUrl}" class="w-full h-full object-cover rounded-[2px] transition-transform duration-200 group-hover:scale-105">`;
+                } else if (asset.mediaType === 'video') {
+                    container.innerHTML = `
+                        <div class="relative w-full h-full">
+                            <video src="${blobUrl}#t=0.5" preload="metadata" muted class="w-full h-full object-cover rounded-[2px]"></video>
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors">
+                                <i class="fa-solid fa-play text-white text-xs drop-shadow-md"></i>
+                            </div>
+                        </div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xs text-red-600"></i>`;
+            }
+        }
+
+        async function openLightbox(index) {
+            currentIndex = index;
+            mediaModal.classList.remove('opacity-0', 'pointer-events-none');
+            renderModalMedia('next');
+        }
+
+        async function renderModalMedia(direction = 'next') {
+            if (currentIndex < 0 || currentIndex >= filteredAssets.length) return;
+
+            const asset = filteredAssets[currentIndex];
+            modalFileName.textContent = asset.name;
+            modalCounter.textContent = `${currentIndex + 1} / ${filteredAssets.length}`;
+
+            modalViewer.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-2xl text-[#800000]"></i>`;
+
+            try {
+                const blobUrl = await getAssetBlobUrl(asset);
+                const animClass = direction === 'next' ? 'slide-next-enter' : 'slide-prev-enter';
+
+                modalViewer.className = `w-full h-full flex items-center justify-center ${animClass}`;
+
+                if (asset.mediaType === 'image') {
+                    modalViewer.innerHTML = `<img src="${blobUrl}" class="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-[3px] shadow-sm">`;
+                } else if (asset.mediaType === 'video') {
+                    modalViewer.innerHTML = `<video src="${blobUrl}" controls autoplay loop class="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-[3px] shadow-sm"></video>`;
+                }
+            } catch (err) {
+                modalViewer.innerHTML = `<span class="text-xs font-mono text-red-600">Failed to render asset.</span>`;
+            }
+        }
+
+        function navigateModal(step, direction) {
+            if (filteredAssets.length === 0) return;
+            currentIndex = (currentIndex + step + filteredAssets.length) % filteredAssets.length;
+            renderModalMedia(direction);
+        }
+
+        function closeLightbox() {
+            modalViewer.innerHTML = '';
+            mediaModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-3 py-1.5 bg-[#f0e0d6] border border-[#800000] text-xs font-mono rounded-[3px] text-[#800000] font-bold shadow-lg flex items-center gap-2`;
+            toast.innerHTML = `<span>${message}</span>`;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 2500);
+        }
+    </script>
+</body>
+</html>
