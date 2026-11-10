@@ -12,14 +12,14 @@
                 extend: {
                     colors: {
                         chan: {
-                            bg: '#ffeef0',         // Yotsuba B warm background
-                            post: '#f0e0d6',       // Post box warm beige
+                            bg: '#ffeef0',
+                            post: '#f0e0d6',
                             postHover: '#ea3e1',
-                            header: '#800000',     // Classic maroon / dark red
+                            header: '#800000',
                             headerText: '#ffffee',
                             text: '#000000',
                             muted: '#444444',
-                            border: '#d9bfb7',     // Soft vintage border
+                            border: '#d9bfb7',
                             borderDark: '#b7c5d9',
                             link: '#34345c',
                             linkHover: '#dd0000'
@@ -56,7 +56,6 @@
             -ms-user-select: none;
         }
 
-        /* 4chan Board Aesthetics with Sharp 3px Borders */
         .chan-card {
             background-color: #f0e0d6;
             border: 1px solid #d9bfb7;
@@ -106,7 +105,7 @@
             font-weight: bold;
         }
 
-        /* Disable image drag and saving visuals */
+        /* Prevent drag & interactions for downloading */
         img, video {
             -webkit-user-drag: none;
             -khtml-user-drag: none;
@@ -116,7 +115,6 @@
             pointer-events: auto;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -132,7 +130,6 @@
             background: #800000;
         }
 
-        /* Responsive Fluid Grid Layout */
         .responsive-media-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -145,7 +142,6 @@
             }
         }
 
-        /* Swipe Slide Animations */
         .slide-next-enter {
             animation: slideNextEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
@@ -165,15 +161,13 @@
 </head>
 <body class="min-h-screen flex flex-col bg-[#ffeef0] text-[#800000]" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
 
-    <!-- Notification Toast -->
     <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Board Header -->
     <header class="border-b border-[#d9bfb7] bg-[#f0e0d6] px-4 py-2.5 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="font-mono text-sm font-bold text-[#800000]">/media/</span>
-                <span class="text-xs font-mono text-[#444444] hidden sm:inline">- prakharrpatel / display-prv-data-mp4</span>
+                <span class="font-mono text-sm font-bold text-[#800000]">Shreyash Bhai Akele Akele mithai khao kyuki hum khake baithe hai</span>
             </div>
 
             <div class="flex items-center gap-2">
@@ -185,10 +179,8 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
 
-        <!-- Access Token Config Box (Collapsible) -->
         <section id="tokenSection" class="hidden chan-card p-3 border-[#d9bfb7]">
             <div class="flex flex-col gap-2">
                 <label class="font-mono text-xs text-[#800000] font-bold">
@@ -205,20 +197,17 @@
         <!-- Board Toolbar -->
         <section class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[#d9bfb7] pb-3">
             
-            <!-- Category Filter Tabs -->
-            <div class="flex items-center gap-1">
-                <button class="chan-pill active px-3 py-1 text-xs font-mono" data-filter="all">
-                    ALL <span id="countAll" class="opacity-70">(0)</span>
-                </button>
-                <button class="chan-pill px-3 py-1 text-xs font-mono" data-filter="image">
-                    IMAGES <span id="countImages" class="opacity-70">(0)</span>
-                </button>
-                <button class="chan-pill px-3 py-1 text-xs font-mono" data-filter="video">
-                    VIDEOS <span id="countVideos" class="opacity-70">(0)</span>
-                </button>
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-1">
+                    <button class="chan-pill active px-3 py-1 text-xs font-mono" data-filter="video">
+                        VIDEOS <span id="countVideos" class="opacity-90 font-bold">(523+)</span>
+                    </button>
+                </div>
+                <p class="text-[11px] font-mono text-[#800000] italic mt-1">
+                    Fetching these much of mithai for you shreyash bhai is so hectic and you know where the energy is going these months...
+                </p>
             </div>
 
-            <!-- Search & Fetch -->
             <div class="flex items-center gap-2">
                 <input type="text" id="searchInput" placeholder="Search file names..." class="chan-input px-3 py-1 text-xs font-mono w-full sm:w-48">
                 <button id="syncBtn" class="chan-btn px-3 py-1 text-xs font-mono flex items-center gap-1.5 shrink-0">
@@ -230,7 +219,6 @@
 
         <!-- Media Grid Area -->
         <section class="min-h-[400px]">
-            <!-- Skeleton Loading -->
             <div id="skeletonLoader" class="hidden responsive-media-grid">
                 <script>
                     for(let i=0; i<12; i++) {
@@ -244,25 +232,22 @@
                 </script>
             </div>
 
-            <!-- Empty State -->
             <div id="emptyState" class="chan-card p-8 text-center max-w-sm mx-auto my-12 flex flex-col items-center">
                 <i class="fa-regular fa-folder-open text-2xl text-[#800000] mb-2"></i>
-                <h3 class="font-mono text-xs font-bold text-[#800000]">No Assets Loaded</h3>
+                <h3 class="font-mono text-xs font-bold text-[#800000]">No Video Assets Loaded</h3>
                 <p class="text-xs text-[#444444] mt-1 font-sans">
                     Click 'Reload' or verify access token if repo is private.
                 </p>
             </div>
 
-            <!-- Asset Grid -->
             <div id="mediaGrid" class="responsive-media-grid"></div>
         </section>
 
     </main>
 
-    <!-- Fullscreen Swipe Lightbox Modal -->
+    <!-- Fullscreen Lightbox Modal -->
     <div id="mediaModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200">
         
-        <!-- Touch / Click Nav Controls Overlay -->
         <button id="prevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-[3px] bg-[#f0e0d6] text-[#800000] border border-[#d9bfb7] hover:bg-[#800000] hover:text-white flex items-center justify-center transition">
             <i class="fa-solid fa-chevron-left text-sm"></i>
         </button>
@@ -271,9 +256,7 @@
             <i class="fa-solid fa-chevron-right text-sm"></i>
         </button>
 
-        <!-- Main Lightbox Dialog -->
         <div class="chan-card w-full max-w-4xl overflow-hidden flex flex-col max-h-[95vh] bg-[#f0e0d6] relative z-20">
-            <!-- Modal Header -->
             <div class="p-2 sm:p-3 border-b border-[#d9bfb7] flex items-center justify-between bg-[#f0e0d6]">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <span id="modalCounter" class="font-mono text-xs font-bold text-[#800000] bg-[#ffeef0] px-2 py-0.5 border border-[#d9bfb7] rounded-[3px]">1 / 1</span>
@@ -284,10 +267,8 @@
                 </button>
             </div>
 
-            <!-- Modal Content Body (Swipe Container) -->
             <div id="swipeContainer" class="p-2 sm:p-4 flex-1 overflow-hidden flex items-center justify-center bg-[#ffeef0] relative min-h-[300px] max-h-[80vh]">
                 <div id="modalViewer" class="w-full h-full flex items-center justify-center">
-                    <!-- Dynamic Media Content -->
                 </div>
             </div>
         </div>
@@ -301,22 +282,17 @@
             path: ''
         };
 
-        const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'avif', 'bmp'];
         const VIDEO_EXTS = ['mp4', 'webm', 'mov', 'm4v', 'ogg'];
 
         let allAssets = [];
         let filteredAssets = [];
-        let currentFilter = 'all';
         let currentIndex = -1;
 
-        // In-memory cache for Object URLs (Security measure: blob URLs hide original GitHub endpoints)
         const objectUrlCache = new Map();
 
-        // Touch Swipe State
         let touchStartX = 0;
         let touchEndX = 0;
 
-        // DOM References
         const syncBtn = document.getElementById('syncBtn');
         const syncIcon = document.getElementById('syncIcon');
         const searchInput = document.getElementById('searchInput');
@@ -331,12 +307,8 @@
         const saveTokenBtn = document.getElementById('saveTokenBtn');
         const clearTokenBtn = document.getElementById('clearTokenBtn');
 
-        const countAll = document.getElementById('countAll');
-        const countImages = document.getElementById('countImages');
         const countVideos = document.getElementById('countVideos');
-        const pillTabs = document.querySelectorAll('.chan-pill');
 
-        // Modal
         const mediaModal = document.getElementById('mediaModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const prevBtn = document.getElementById('prevBtn');
@@ -358,15 +330,6 @@
             syncBtn.addEventListener('click', fetchRepoContents);
             searchInput.addEventListener('input', applyFilters);
 
-            pillTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    pillTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    currentFilter = tab.getAttribute('data-filter');
-                    applyFilters();
-                });
-            });
-
             toggleSettingsBtn.addEventListener('click', () => tokenSection.classList.toggle('hidden'));
 
             saveTokenBtn.addEventListener('click', () => {
@@ -387,7 +350,6 @@
                 fetchRepoContents();
             });
 
-            // Lightbox Nav
             closeModalBtn.addEventListener('click', closeLightbox);
             prevBtn.addEventListener('click', () => navigateModal(-1, 'prev'));
             nextBtn.addEventListener('click', () => navigateModal(1, 'next'));
@@ -396,7 +358,6 @@
                 if (e.target === mediaModal) closeLightbox();
             });
 
-            // Keyboard Navigation
             document.addEventListener('keydown', (e) => {
                 if (mediaModal.classList.contains('opacity-0')) return;
                 if (e.key === 'ArrowLeft') navigateModal(-1, 'prev');
@@ -404,7 +365,6 @@
                 if (e.key === 'Escape') closeLightbox();
             });
 
-            // Swipe Gestures for Mobile
             swipeContainer.addEventListener('touchstart', (e) => {
                 touchStartX = e.changedTouches[0].screenX;
             }, { passive: true });
@@ -418,9 +378,9 @@
         function handleSwipeGesture() {
             const swipeThreshold = 50;
             if (touchEndX < touchStartX - swipeThreshold) {
-                navigateModal(1, 'next'); // Swipe Left -> Next
+                navigateModal(1, 'next');
             } else if (touchEndX > touchStartX + swipeThreshold) {
-                navigateModal(-1, 'prev'); // Swipe Right -> Prev
+                navigateModal(-1, 'prev');
             }
         }
 
@@ -431,7 +391,6 @@
             syncBtn.disabled = true;
             syncIcon.classList.add('fa-spin');
 
-            // Clear previous Blob URLs
             objectUrlCache.forEach(url => URL.revokeObjectURL(url));
             objectUrlCache.clear();
 
@@ -454,22 +413,20 @@
 
                 if (!Array.isArray(data)) throw new Error('Path is not a valid folder.');
 
+                // ONLY FILTER VIDEO FILES
                 allAssets = data.filter(item => item.type === 'file').map(file => {
                     const ext = file.name.split('.').pop().toLowerCase();
                     let mediaType = 'other';
-                    if (IMAGE_EXTS.includes(ext)) mediaType = 'image';
-                    else if (VIDEO_EXTS.includes(ext)) mediaType = 'video';
-
+                    if (VIDEO_EXTS.includes(ext)) mediaType = 'video';
                     return { ...file, ext, mediaType };
-                }).filter(file => file.mediaType === 'image' || file.mediaType === 'video');
+                }).filter(file => file.mediaType === 'video');
 
-                showToast(`Loaded ${allAssets.length} assets`, 'success');
-                updateCounts();
+                showToast(`Loaded videos successfully`, 'success');
                 applyFilters();
 
             } catch (err) {
                 console.error(err);
-                showToast(err.message || 'Failed to load media.', 'error');
+                showToast(err.message || 'Failed to load videos.', 'error');
                 emptyState.classList.remove('hidden');
             } finally {
                 skeletonLoader.classList.add('hidden');
@@ -478,22 +435,11 @@
             }
         }
 
-        function updateCounts() {
-            const imgCount = allAssets.filter(a => a.mediaType === 'image').length;
-            const vidCount = allAssets.filter(a => a.mediaType === 'video').length;
-
-            countAll.textContent = `(${allAssets.length})`;
-            countImages.textContent = `(${imgCount})`;
-            countVideos.textContent = `(${vidCount})`;
-        }
-
         function applyFilters() {
             const query = searchInput.value.toLowerCase().trim();
 
             filteredAssets = allAssets.filter(asset => {
-                const matchesSearch = asset.name.toLowerCase().includes(query);
-                const matchesType = (currentFilter === 'all') || (asset.mediaType === currentFilter);
-                return matchesSearch && matchesType;
+                return asset.name.toLowerCase().includes(query);
             });
 
             renderGrid();
@@ -533,7 +479,6 @@
             });
         }
 
-        // Fetch asset as Secure Blob URL to prevent exposing GitHub raw links
         async function getAssetBlobUrl(asset) {
             if (objectUrlCache.has(asset.sha)) {
                 return objectUrlCache.get(asset.sha);
@@ -556,17 +501,13 @@
 
             try {
                 const blobUrl = await getAssetBlobUrl(asset);
-                if (asset.mediaType === 'image') {
-                    container.innerHTML = `<img src="${blobUrl}" class="w-full h-full object-cover rounded-[2px] transition-transform duration-200 group-hover:scale-105">`;
-                } else if (asset.mediaType === 'video') {
-                    container.innerHTML = `
-                        <div class="relative w-full h-full">
-                            <video src="${blobUrl}#t=0.5" preload="metadata" muted class="w-full h-full object-cover rounded-[2px]"></video>
-                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors">
-                                <i class="fa-solid fa-play text-white text-xs drop-shadow-md"></i>
-                            </div>
-                        </div>`;
-                }
+                container.innerHTML = `
+                    <div class="relative w-full h-full">
+                        <video src="${blobUrl}#t=0.5" preload="metadata" muted controlsList="nodownload noremoteplayback" disablepictureinpicture class="w-full h-full object-cover rounded-[2px]"></video>
+                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors">
+                            <i class="fa-solid fa-play text-white text-xs drop-shadow-md"></i>
+                        </div>
+                    </div>`;
             } catch (err) {
                 container.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xs text-red-600"></i>`;
             }
@@ -593,13 +534,10 @@
 
                 modalViewer.className = `w-full h-full flex items-center justify-center ${animClass}`;
 
-                if (asset.mediaType === 'image') {
-                    modalViewer.innerHTML = `<img src="${blobUrl}" class="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-[3px] shadow-sm">`;
-                } else if (asset.mediaType === 'video') {
-                    modalViewer.innerHTML = `<video src="${blobUrl}" controls autoplay loop class="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-[3px] shadow-sm"></video>`;
-                }
+                // Video renderer configured to prevent downloads
+                modalViewer.innerHTML = `<video src="${blobUrl}" controls autoplay loop controlsList="nodownload noremoteplayback" disablepictureinpicture class="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-[3px] shadow-sm"></video>`;
             } catch (err) {
-                modalViewer.innerHTML = `<span class="text-xs font-mono text-red-600">Failed to render asset.</span>`;
+                modalViewer.innerHTML = `<span class="text-xs font-mono text-red-600">Failed to render video asset.</span>`;
             }
         }
 
